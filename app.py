@@ -94,8 +94,72 @@ def add_brands():
                     session.add(new_brand)
         session.commit()
 
+def menu():
+    while True:
+        print("""
+              \n----Grocery Inventory----
+              \rV) View Product Details
+              \rN) New Product
+              \rA) Analysis
+              \rB) Backup
+              \rQ) Exit Program""")
+        choice = input('What would like to do? ')
+        if choice in ['V', 'N', 'A', 'B', 'Q']:
+            return choice
+        else:
+            print('\n Please choose one of the options above.')
+
+def submenu():
+    while True:
+        print("""
+              \n1) Edit
+              \r2) Delete
+              \r3) Return to Main Menu
+              """)
+        choice = input('What would like to do? ')
+        if choice in ['1', '2', '3']:
+            return choice
+        else:
+            print('\n Please choose one of the options above.')
+            
 def app():
-    return 0
+    app_running = True
+    while app_running:
+        choice = menu()
+        if choice == 'V':
+            id_options = []
+            for product in session.query(Product):
+                id_options.append(product.product_id)
+            print(f'Your options are {id_options}.')
+            try:
+                id_choice = int(input('Please select your product ID: '))
+            except ValueError:
+                print('Error: Please enter a valid product ID.')
+            else:
+                if id_choice in id_options:
+                    the_product = session.query(Product).filter(Product.product_id==id_choice).first()
+                    the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
+                    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                                'Product ID', 'Product Name', 'Brand','Quantity','Price','Last Updated'))
+                    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                            the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
+                            "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+# strftime("%b %d, %Y")
+        elif choice == 'N':
+            continue
+
+        elif choice == 'A':
+            continue
+
+        elif choice == 'B':
+            continue
+
+        elif choice == 'Q':
+            print("\nGoodbye! ^_^")
+            app_running = False
+
+        else:
+            print("\nPlease enter one of the options above.")
 
 if __name__ == "__main__":
     Base.metadata.create_all(engine)
