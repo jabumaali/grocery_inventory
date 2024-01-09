@@ -122,28 +122,34 @@ def submenu():
         else:
             print('\n Please choose one of the options above.')
             
+def view_product():
+    id_options = []
+    for product in session.query(Product):
+        id_options.append(product.product_id)
+    while True:
+        print(f'Your options are {id_options}.')
+        try:
+            id_choice = int(input('Please select your product ID: '))
+            if id_choice not in id_options:
+                raise ValueError
+        except ValueError:
+            print('Error: Please enter a valid product ID.')
+        else:
+            if id_choice in id_options:
+                the_product = session.query(Product).filter(Product.product_id==id_choice).first()
+                the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
+                print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                            'Product ID', 'Product Name', 'Brand','Quantity','Price','Last Updated'))
+                print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                        the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
+                        "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+                return 0
 def app():
     app_running = True
     while app_running:
         choice = menu()
         if choice == 'V':
-            id_options = []
-            for product in session.query(Product):
-                id_options.append(product.product_id)
-            print(f'Your options are {id_options}.')
-            try:
-                id_choice = int(input('Please select your product ID: '))
-            except ValueError:
-                print('Error: Please enter a valid product ID.')
-            else:
-                if id_choice in id_options:
-                    the_product = session.query(Product).filter(Product.product_id==id_choice).first()
-                    the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
-                    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
-                                'Product ID', 'Product Name', 'Brand','Quantity','Price','Last Updated'))
-                    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
-                            the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
-                            "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+            view_product()
 # strftime("%b %d, %Y")
         elif choice == 'N':
             continue
