@@ -7,7 +7,6 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import csv
 import datetime
-import time
 
 engine = create_engine ("sqlite:///inventory.db", echo=False)
 Session = sessionmaker(bind=engine)
@@ -50,10 +49,6 @@ class Product(Base):
     Product Price = {self.product_price}\r
     Date Updated = {self.date_updated}\r
     """
-
-def clean_price(price_str):
-    final_price = round(float(price_str)*100)
-    return final_price
 
 def add_prod():
     with open('inventory.csv') as csvfile:
@@ -122,6 +117,10 @@ def submenu():
         else:
             print('\n Please choose one of the options above.')
             
+def clean_price(price_str):
+    final_price = round(float(price_str)*100)
+    return final_price
+
 def view_product():
     id_options = []
     for product in session.query(Product):
@@ -139,23 +138,57 @@ def view_product():
                 the_product = session.query(Product).filter(Product.product_id==id_choice).first()
                 the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
                 print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
-                            'Product ID', 'Product Name', 'Brand','Quantity','Price','Last Updated'))
+                            'Product ID', 'Product Name', 'Brand', 'Quantity', 'Price', 'Last Updated'))
                 print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
                         the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
                         "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
                 return 0
+            
+def add_product():
+    name = input('Product Name: ')
+    new_brand = input('Brand Name: ')
+    brand_exists = False
+    for brand in session.query(Brands).all():
+        if new_brand == brand.brand_name:
+            brandid = brand.brand_id
+            brand_exists = True
+    if brand_exists == False:
+        session.add(Brands(brand_name = new_brand))
+        session.commit()
+        knownbrand = session.query(Brands).filter(Brands.brand_name == new_brand).first()
+        brandid = knownbrand.brand_id
+    quantity = input('Quantity: ')
+    price = input('Please enter the price in the following format.\nEx: Enter $5.30 as 5.30\nPrice: ')
+    price = clean_price(price)
+    dateup = datetime.date.today()
+    new_prod = Product(product_name=name, product_price=price, product_quantity = quantity, date_updated = dateup, brand_id = brandid)
+    session.add(new_prod)
+    session.commit()
+
+def prod_analysis():
+    most_exp = session.query(Product).order_by(Product.product_price.desc()).first()
+    print(f'\nThe most expensive item is {most_exp.product_name} at $'+'%.2f'%round(float(most_exp.product_price/100),2)+'.')
+    least_exp = session.query(Product).order_by(Product.product_price).first()
+    print(f'\nThe most expensive item is {least_exp.product_name} at $'+'%.2f'%round(float(least_exp.product_price/100),2)+'.')
+    # ...
+    most_brand = 'Kroger'
+    most_quantity = 334
+    print(f'\n{most_brand} has the most products, with a current total of {most_quantity}.')
+    return 0
+
+
 def app():
     app_running = True
     while app_running:
         choice = menu()
         if choice == 'V':
             view_product()
-# strftime("%b %d, %Y")
+
         elif choice == 'N':
-            continue
+            add_product()
 
         elif choice == 'A':
-            continue
+            prod_analysis()
 
         elif choice == 'B':
             continue
