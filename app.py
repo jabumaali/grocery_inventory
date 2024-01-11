@@ -170,11 +170,21 @@ def prod_analysis():
     print(f'\nThe most expensive item is {most_exp.product_name} at $'+'%.2f'%round(float(most_exp.product_price/100),2)+'.')
     least_exp = session.query(Product).order_by(Product.product_price).first()
     print(f'\nThe most expensive item is {least_exp.product_name} at $'+'%.2f'%round(float(least_exp.product_price/100),2)+'.')
-    # ...
-    most_brand = 'Kroger'
-    most_quantity = 334
+    
+    num_brands = session.query(Brands).count()
+    brand_totals = [0]*(num_brands+1)
+    for product in session.query(Product).all():
+        brand_totals[product.brand_id] += product.product_quantity
+    temp = 0
+    i = 0
+    for x in brand_totals:
+        if x > temp:
+            temp = x
+            index = i
+        i += 1
+    most_quantity = temp
+    most_brand = session.query(Brands).filter(Brands.brand_id == index).first().brand_name
     print(f'\n{most_brand} has the most products, with a current total of {most_quantity}.')
-    return 0
 
 
 def app():
