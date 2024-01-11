@@ -7,6 +7,7 @@ from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 import csv
 import datetime
+from time import sleep
 
 engine = create_engine ("sqlite:///inventory.db", echo=False)
 Session = sessionmaker(bind=engine)
@@ -95,11 +96,12 @@ def menu():
               \n----Grocery Inventory----
               \rV) View Product Details
               \rN) New Product
+              \rE) Edit/Delete Product
               \rA) Analysis
               \rB) Backup
               \rQ) Exit Program""")
         choice = input('What would like to do? ')
-        if choice in ['V', 'N', 'A', 'B', 'Q']:
+        if choice in ['V', 'N', 'E', 'A', 'B', 'Q']:
             return choice
         else:
             print('\n Please choose one of the options above.')
@@ -115,7 +117,7 @@ def submenu():
         if choice in ['1', '2', '3']:
             return choice
         else:
-            print('\n Please choose one of the options above.')
+            print('\nPlease choose one of the options above.')
             
 def clean_price(price_str):
     final_price = round(float(price_str)*100)
@@ -157,6 +159,16 @@ def add_product():
         session.commit()
         knownbrand = session.query(Brands).filter(Brands.brand_name == new_brand).first()
         brandid = knownbrand.brand_id
+    # NEED to check if product also exists. If repeat product, new entry in inventory.
+    product_exists = False
+    for productx in session.query(Product).all():
+        if productx.product_name == name:
+            product_exists = True
+            prodid = productx.product_id
+            break
+    if product_exists and brand_exists:
+        print(f'This product and brand already exists (ID = {prodid}). Please edit the product.')
+        return 0
     quantity = input('Quantity: ')
     price = input('Please enter the price in the following format.\nEx: Enter $5.30 as 5.30\nPrice: ')
     price = clean_price(price)
@@ -165,12 +177,46 @@ def add_product():
     session.add(new_prod)
     session.commit()
 
+
+
+def edit_product(brandid, prodid):
+    the_product = session.query(Product).filter(Product.product_id == prodid, Product.brand_id == brandid).first()
+    quantity = input('Quantity: ')
+    curr_price = "$"+"%.2f"%round(float(the_product.product_price/100),2)
+    price = input(f"""Please enter the price in the following format.
+                  \nEx: Enter $5.30 as 5.30
+                  \nCURRENT PRICE: {curr_price}
+                  \nPrice: """)
+    price = clean_price(price)
+    dateup = datetime.date.today()
+    the_product.product_quantity = quantity
+    the_product.product_price = price
+    the_product.date_updated = dateup
+    session.commit()
+    the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
+    print('Your product has been updated!\n')
+    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                'Product ID', 'Product Name', 'Brand', 'Quantity', 'Price', 'Last Updated'))
+    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+            the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
+            "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+    sleep(1.5)
+
+
+def delete_product(brandid, prodid):
+    the_product = session.query(Product).filter(Product.product_id == prodid, Product.brand_id == brandid).first()
+    session.delete(the_product)
+    session.commit()
+    print('Your product has been deleted.')
+    sleep(1.5)
+
 def prod_analysis():
     most_exp = session.query(Product).order_by(Product.product_price.desc()).first()
-    print(f'\nThe most expensive item is {most_exp.product_name} at $'+'%.2f'%round(float(most_exp.product_price/100),2)+'.')
+    print(f'\nThe most expensive item is {most_exp.product_name} at $'
+          +'%.2f'%round(float(most_exp.product_price/100),2)+'.')
     least_exp = session.query(Product).order_by(Product.product_price).first()
-    print(f'\nThe most expensive item is {least_exp.product_name} at $'+'%.2f'%round(float(least_exp.product_price/100),2)+'.')
-    
+    print(f'\nThe most expensive item is {least_exp.product_name} at $'
+          +'%.2f'%round(float(least_exp.product_price/100),2)+'.')
     num_brands = session.query(Brands).count()
     brand_totals = [0]*(num_brands+1)
     for product in session.query(Product).all():
@@ -196,6 +242,28 @@ def app():
 
         elif choice == 'N':
             add_product()
+            
+        elif choice == 'E':
+            prodname = input('Product name: ')
+            brandname = input('Brand name: ')
+            brand_exists = False
+            for brand in session.query(Brands).all():
+                if brandname == brand.brand_name:
+                    brandid = brand.brand_id
+                    brand_exists = True
+            product_exists = False
+            for productx in session.query(Product).all():
+                if prodname == productx.product_name:
+                    product_exists = True
+                    prodid = productx.product_id
+            if brand_exists and product_exists:
+                subchoice = submenu()
+                if subchoice == '1':
+                    edit_product(brandid, prodid)
+                if subchoice == '2':
+                    delete_product(brandid, prodid)
+            else:
+                print('Could not find product & brand. Please try again.')
 
         elif choice == 'A':
             prod_analysis()
