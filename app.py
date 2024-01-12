@@ -217,12 +217,19 @@ def prod_analysis():
     least_exp = session.query(Product).order_by(Product.product_price).first()
     print(f'\nThe most expensive item is {least_exp.product_name} at $'
           +'%.2f'%round(float(least_exp.product_price/100),2)+'.')
-    num_brands = session.query(Brands).count()
-    brand_totals = [0]*(num_brands+1)
+    all_brands = []
+    for brand in session.query(Brands).all():
+        all_brands.append(brand.brand_id)
+    print(all_brands)
+    brand_totals = [0]*(max(all_brands)+1)
     for product in session.query(Product).all():
-        brand_totals[product.brand_id] += product.product_quantity
+        for i in all_brands:
+            if product.brand_id == i:
+                brand_totals[i] += product.product_quantity
+    print(brand_totals)
     temp = 0
     i = 0
+    index = 0
     for x in brand_totals:
         if x > temp:
             temp = x
