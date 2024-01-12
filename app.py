@@ -118,7 +118,7 @@ def submenu():
             return choice
         else:
             print('\nPlease choose one of the options above.')
-            
+
 def clean_price(price_str):
     final_price = round(float(price_str)*100)
     return final_price
@@ -145,7 +145,7 @@ def view_product():
                         the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
                         "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
                 return 0
-            
+
 def add_product():
     name = input('Product Name: ')
     new_brand = input('Brand Name: ')
@@ -177,8 +177,6 @@ def add_product():
     session.add(new_prod)
     session.commit()
 
-
-
 def edit_product(brandid, prodid):
     the_product = session.query(Product).filter(Product.product_id == prodid, Product.brand_id == brandid).first()
     quantity = input('Quantity: ')
@@ -201,7 +199,6 @@ def edit_product(brandid, prodid):
             the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
             "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
     sleep(1.5)
-
 
 def delete_product(brandid, prodid):
     the_product = session.query(Product).filter(Product.product_id == prodid, Product.brand_id == brandid).first()
@@ -239,6 +236,17 @@ def prod_analysis():
     most_brand = session.query(Brands).filter(Brands.brand_id == index).first().brand_name
     print(f'\n{most_brand} has the most products, with a current total of {most_quantity}.')
 
+def backup_db():
+    # outfile = open()
+    with open('brands_backup.csv', 'a') as csvfile:
+        fieldnames = ['first_name', 'last_name']
+        teachwriter = csv.DictWriter(csvfile, fieldnames = fieldnames)
+
+        teachwriter.writeheader()
+        teachwriter.writerow({
+            'first_name': 'Kenneth',
+            'last_name': 'Love'
+        })
 
 def app():
     app_running = True
@@ -276,7 +284,7 @@ def app():
             prod_analysis()
 
         elif choice == 'B':
-            continue
+            backup_db()
 
         elif choice == 'Q':
             print("\nGoodbye! ^_^")
