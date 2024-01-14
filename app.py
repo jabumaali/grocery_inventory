@@ -95,13 +95,14 @@ def menu():
         print("""
               \n----Grocery Inventory----
               \rV) View Product Details
+              \rV2) VIEW ALL
               \rN) New Product
               \rE) Edit/Delete Product
               \rA) Analysis
               \rB) Backup
               \rQ) Exit Program""")
         choice = input('What would like to do? ')
-        if choice in ['V', 'N', 'E', 'A', 'B', 'Q']:
+        if choice in ['V', 'V2', 'N', 'E', 'A', 'B', 'Q']:
             return choice
         else:
             print('\n Please choose one of the options above.')
@@ -146,6 +147,18 @@ def view_product():
                         "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
                 return 0
 
+def view_all():
+    print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                            'Product ID', 'Product Name', 'Brand', 'Quantity', 'Price', 'Last Updated'))
+    for the_product in session.query(Product).all():
+        the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
+        print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
+                        the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
+                        "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+        
+
+    return 0
+    
 def add_product():
     name = input('Product Name: ')
     new_brand = input('Brand Name: ')
@@ -254,6 +267,9 @@ def app():
         choice = menu()
         if choice == 'V':
             view_product()
+
+        elif choice == 'V2':
+            view_all()
 
         elif choice == 'N':
             add_product()
