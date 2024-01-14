@@ -221,6 +221,7 @@ def delete_product(brandid, prodid):
     sleep(1.5)
 
 def prod_analysis():
+    #### FIX LEST VS MOST
     most_exp = session.query(Product).order_by(Product.product_price.desc()).first()
     print(f'\nThe most expensive item is {most_exp.product_name} at $'
           +'%.2f'%round(float(most_exp.product_price/100),2)+'.')
