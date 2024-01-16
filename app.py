@@ -251,16 +251,22 @@ def prod_analysis():
     print(f'\n{most_brand} has the most products, with a current total of {most_quantity}.')
 
 def backup_db():
-    # outfile = open()
-    with open('brands_backup.csv', 'a') as csvfile:
-        fieldnames = ['first_name', 'last_name']
-        teachwriter = csv.DictWriter(csvfile, fieldnames = fieldnames)
+    with open('brands.csv') as csvfile:
+        data = csv.reader(csvfile)
+        for row in data:
+            bfieldnames = row
+            break
+    with open('inventory.csv') as csvfile:
+        data = csv.reader(csvfile)
+        for row in data:
+            pfieldnames = row
+            break
 
-        teachwriter.writeheader()
-        teachwriter.writerow({
-            'first_name': 'Kenneth',
-            'last_name': 'Love'
-        })
+    with open('brands_backup.csv', 'w') as csvfile:
+        brandwriter = csv.writer(csvfile)
+        brandwriter.writerow(bfieldnames)
+        for brand in session.query(Brands.brand_name).all():
+            brandwriter.writerow(brand) # Skipping lines each time.. please fix lineterminator
 
 def app():
     app_running = True
