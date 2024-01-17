@@ -221,26 +221,21 @@ def delete_product(brandid, prodid):
     sleep(1.5)
 
 def prod_analysis():
-    #### FIX LEST VS MOST
     most_exp = session.query(Product).order_by(Product.product_price.desc()).first()
     print(f'\nThe most expensive item is {most_exp.product_name} at $'
           +'%.2f'%round(float(most_exp.product_price/100),2)+'.')
     least_exp = session.query(Product).order_by(Product.product_price).first()
-    print(f'\nThe most expensive item is {least_exp.product_name} at $'
+    print(f'\nThe least expensive item is {least_exp.product_name} at $'
           +'%.2f'%round(float(least_exp.product_price/100),2)+'.')
     all_brands = []
     for brand in session.query(Brands).all():
         all_brands.append(brand.brand_id)
-    print(all_brands)
     brand_totals = [0]*(max(all_brands)+1)
     for product in session.query(Product).all():
         for i in all_brands:
             if product.brand_id == i:
                 brand_totals[i] += product.product_quantity
-    print(brand_totals)
-    temp = 0
-    i = 0
-    index = 0
+    temp, i, index = 0, 0, 0
     for x in brand_totals:
         if x > temp:
             temp = x
@@ -249,6 +244,19 @@ def prod_analysis():
     most_quantity = temp
     most_brand = session.query(Brands).filter(Brands.brand_id == index).first().brand_name
     print(f'\n{most_brand} has the most products, with a current total of {most_quantity}.')
+
+    #Extra: Most recent change.
+    recent = session.query(Product).order_by(Product.date_updated.desc()).first()
+    print(f"\nThe last edit to the inventory was made to {recent.product_name} on {recent.date_updated.strftime("%m/%d/%Y")}.")
+
+    #Extra: Average price (not weighted).
+    total, num = 0, 0
+    for prod in session.query(Product).all():
+        total += prod.product_price
+        num += 1
+    avg = total/num
+    print(f"\nThe average product price is ${"%.2f"%round(float(avg/100),2)}.")
+
 
 def backup_db():
     with open('brands.csv') as csvfile:
