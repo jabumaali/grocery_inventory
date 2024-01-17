@@ -153,8 +153,8 @@ def view_all():
     for the_product in session.query(Product).all():
         the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
         print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
-                        the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
-                        "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+                the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
+                "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
         
 
     return 0
@@ -261,12 +261,21 @@ def backup_db():
         for row in data:
             pfieldnames = row
             break
-
-    with open('brands_backup.csv', 'w') as csvfile:
+    #NOTE: 'w' overwrites file. 'a' would append.
+    with open('brands_backup.csv', 'w') as csvfile: 
         brandwriter = csv.writer(csvfile, lineterminator='\r')
         brandwriter.writerow(bfieldnames)
         for brand in session.query(Brands.brand_name).all():
-            brandwriter.writerow(brand) # Skipping lines each time.. please fix lineterminator
+            brandwriter.writerow(brand)
+    with open('inventory_backup.csv', 'wb') as csvfile:
+        prodwriter = csv.writer(csvfile, delimiter = ',', lineterminator='\r')
+        prodwriter.writerow(pfieldnames)
+        data = session.query(Product).all() #err
+        for the_product in session.query(Product).all():
+            the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
+            curr_prod = [the_product.product_name, "$"+"%.2f"%round(float(the_product.product_price/100),2),
+                         the_product.product_quantity, the_product.date_updated.strftime("%m/%d/%Y"), the_brand.brand_name]
+            prodwriter.writerow(curr_prod)
 
 def app():
     app_running = True
