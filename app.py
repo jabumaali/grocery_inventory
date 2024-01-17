@@ -263,7 +263,7 @@ def backup_db():
             break
 
     with open('brands_backup.csv', 'w') as csvfile:
-        brandwriter = csv.writer(csvfile)
+        brandwriter = csv.writer(csvfile, lineterminator='\r')
         brandwriter.writerow(bfieldnames)
         for brand in session.query(Brands.brand_name).all():
             brandwriter.writerow(brand) # Skipping lines each time.. please fix lineterminator
