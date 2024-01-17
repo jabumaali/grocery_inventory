@@ -275,7 +275,7 @@ def backup_db():
         brandwriter.writerow(bfieldnames)
         for brand in session.query(Brands.brand_name).all():
             brandwriter.writerow(brand)
-    with open('inventory_backup.csv', 'wb') as csvfile:
+    with open('inventory_backup.csv', 'w') as csvfile:
         prodwriter = csv.writer(csvfile, delimiter = ',', lineterminator='\r')
         prodwriter.writerow(pfieldnames)
         data = session.query(Product).all() #err
