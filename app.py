@@ -107,7 +107,7 @@ def menu():
         if choice in ['V', 'V2', 'N', 'E', 'A', 'B', 'Q']:
             return choice
         else:
-            print('\n Please choose one of the options above.')
+            print('\nPlease choose one of the options above.')
 
 def submenu():
     while True:
@@ -285,6 +285,8 @@ def backup_db():
             curr_prod = [the_product.product_name, "$"+'%.2f'%round(float(the_product.product_price/100),2),
                          the_product.product_quantity, the_product.date_updated.strftime("%m/%d/%Y"), the_brand.brand_name]
             prodwriter.writerow(curr_prod)
+    print("\nDatabase successfully backed up!")
+    sleep(1.5)
 
 
 def app():
