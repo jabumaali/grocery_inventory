@@ -146,7 +146,7 @@ def view_product():
                             'Product ID', 'Product Name', 'Brand', 'Quantity', 'Price', 'Last Updated'))
                 print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
                         the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
-                        "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+                        "$"+'%.2f'%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
                 return 0
 
 def view_all():
@@ -156,7 +156,7 @@ def view_all():
         the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
         print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
                 the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
-                "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+                "$"+'%.2f'%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
         
 
     return 0
@@ -195,7 +195,7 @@ def add_product():
 def edit_product(brandid, prodid):
     the_product = session.query(Product).filter(Product.product_id == prodid, Product.brand_id == brandid).first()
     quantity = input('Quantity: ')
-    curr_price = "$"+"%.2f"%round(float(the_product.product_price/100),2)
+    curr_price = "$"+'%.2f'%round(float(the_product.product_price/100),2)
     price = input(f"""Please enter the price in the following format.
                   \nEx: Enter $5.30 as 5.30
                   \nCURRENT PRICE: {curr_price}
@@ -212,7 +212,7 @@ def edit_product(brandid, prodid):
                 'Product ID', 'Product Name', 'Brand', 'Quantity', 'Price', 'Last Updated'))
     print ("{:<12} {:<30} {:<14} {:<14} {:<14} {:<14}".format(
             the_product.product_id, the_product.product_name, the_brand.brand_name, the_product.product_quantity, 
-            "$"+"%.2f"%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
+            "$"+'%.2f'%round(float(the_product.product_price/100),2), the_product.date_updated.strftime("%m/%d/%Y")))
     sleep(1.5)
 
 def delete_product(brandid, prodid):
@@ -282,7 +282,7 @@ def backup_db():
         data = session.query(Product).all() #err
         for the_product in session.query(Product).all():
             the_brand = session.query(Brands).filter(Brands.brand_id == the_product.brand_id).first()
-            curr_prod = [the_product.product_name, "$"+"%.2f"%round(float(the_product.product_price/100),2),
+            curr_prod = [the_product.product_name, "$"+'%.2f'%round(float(the_product.product_price/100),2),
                          the_product.product_quantity, the_product.date_updated.strftime("%m/%d/%Y"), the_brand.brand_name]
             prodwriter.writerow(curr_prod)
 
