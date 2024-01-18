@@ -69,10 +69,12 @@ def add_prod():
                     new_prod = Product(product_name=prodname, product_price=price, product_quantity = quantity, date_updated = dateup, brand_id = brandid)
                     session.add(new_prod)
             else:
-                current_prod = session.query(Product).filter(Product.product_name==row[0], Product.brand_id == session.query(Brands).filter(Brands.brand_name == row[4]).first().brand_id).first()
-                current_prod.product_price = clean_price(row[1][1:])
-                current_prod.product_quantity = row[2]
-                current_prod.date_updated = datetime.datetime.strptime(row[3], '%m/%d/%Y')
+                current_prod = session.query(Product).filter(Product.product_name==row[0], 
+                        Product.brand_id == session.query(Brands).filter(Brands.brand_name == row[4]).first().brand_id).first()
+                if datetime.datetime.combine(current_prod.date_updated, datetime.datetime.min.time()) < datetime.datetime.strptime(row[3], '%m/%d/%Y'):
+                    current_prod.product_price = clean_price(row[1][1:])
+                    current_prod.product_quantity = row[2]
+                    current_prod.date_updated = datetime.datetime.strptime(row[3], '%m/%d/%Y')
         session.commit()
 
 def add_brands():
@@ -257,7 +259,6 @@ def prod_analysis():
     avg = total/num
     print(f"\nThe average product price is ${"%.2f"%round(float(avg/100),2)}.")
 
-
 def backup_db():
     with open('brands.csv') as csvfile:
         data = csv.reader(csvfile)
@@ -284,6 +285,7 @@ def backup_db():
             curr_prod = [the_product.product_name, "$"+"%.2f"%round(float(the_product.product_price/100),2),
                          the_product.product_quantity, the_product.date_updated.strftime("%m/%d/%Y"), the_brand.brand_name]
             prodwriter.writerow(curr_prod)
+
 
 def app():
     app_running = True
