@@ -257,7 +257,7 @@ def prod_analysis():
         total += prod.product_price
         num += 1
     avg = total/num
-    print(f"\nThe average product price is ${"%.2f"%round(float(avg/100),2)}.")
+    print(f"\nThe average product price is ${round(float(avg/100),2):.2f}.")
 
 def backup_db():
     with open('brands.csv') as csvfile:
